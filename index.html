@@ -1,480 +1,123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Race Simulation</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        font-family: monospace !important;
-        -webkit-border-radius: 0;
-        -moz-border-radius: 0;
-        border-radius: 0;
-      }
-      h1 {
-        margin-top: 0;
-      }
-      /* Container for participant rows */
-      #raceContainer {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding-top: 20px;
-        overflow-y: auto;
-        height: calc(100vh - 104px);
-        position: relative;
-      }
-      /* Each participant row */
-      .participant {
-        display: flex;
-        align-items: center;
-        position: relative;
-      }
-      /* Animated bar with a default transition (overridden dynamically) */
-      .bar {
-        width: 0;
-        height: 100%;
-        position: relative;
-        text-align: end;
-        transition: width 500ms ease-in-out;
-      }
-      /* Count positioned at the right end of the bar */
-      .count {
-        font-weight: 500;
-        font-size: 1rem;
-        display: inline-block;
-        height: 100%;
-        background-color: white;
-        align-content: center;
-        padding: 0.2rem 0.5rem;
-      }
-      /* Label (participant name) displayed to the left */
-      .label {
-        width: 6rem;
-        height: 100%;
-        padding: 0 0.6rem;
-        text-align: end;
-        background-color: rgb(255, 255, 255);
-      }
-      .label:focus {
-        outline: 2px solid black;
-        outline-offset: -2px;
-      }
-      #startButton,
-      #resetButton {
-        padding: 8px;
-        color: white;
-        line-height: 0;
-        border: none;
-        cursor: pointer;
-      }
-      #startButton {
-        background-color: #000;
-      }
-      #resetButton {
-        background-color: #ff0000;
-        display: none;
-      }
-      #draws,
-      #participantCount,
-      #speed {
-        font-size: 1rem;
-        font-weight: 700;
-        height: 100%;
-        padding: 0.2rem 0.6rem;
-        max-width: 100px;
-        border: 2px solid #000;
-      }
-      #draws:focus,
-      #participantCount:focus,
-      #speed:focus {
-        outline: 2px solid black;
-        outline-offset: -2px;
-      }
-      /* Gray background when input is disabled */
-      input:disabled {
-        background-color: #ccc;
-      }
-      #controls {
-        display: flex;
-        height: 40px;
-        align-items: center;
-        gap: 0.5rem;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Race Simulation</h1>
-    <div id="controls">
-      <!-- Input for number of participants -->
-      <input id="participantCount" value="18" min="1" type="number" />
-      <input id="draws" min="0" type="number" />
-      <button id="startButton">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-play-fill"
-          viewBox="0 0 16 16"
-        >
-          <path
-            d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"
-          />
-        </svg>
-      </button>
-      <button id="resetButton">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          fill="currentColor"
-          class="bi bi-arrow-clockwise"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"
-          />
-          <path
-            d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"
-          />
-        </svg>
-      </button>
-      <input id="speed" value="1" min="1" max="24" type="number" />
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Colosseum Giveaway Royale</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --gold: #e8c26a; --ink: #14100b; --panel: rgba(20, 16, 11, .72); --line: rgba(232, 194, 106, .35); }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0b0906; color: #f3ead8; font-family: Inter, system-ui, sans-serif; overflow: hidden; }
+  canvas#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  h1, h2, .cinzel { font-family: Cinzel, Georgia, serif; letter-spacing: .04em; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  /* admin */
+  #admin { position: fixed; inset: 0; overflow: auto; padding: 24px 16px 48px;
+    background: radial-gradient(1200px 600px at 50% -10%, #3a2a14 0%, #14100b 60%, #0b0906 100%); }
+  #admin .card { max-width: 760px; margin: 0 auto; }
+  #admin h1 { font-size: clamp(26px, 5vw, 44px); margin: 12px 0 4px; color: var(--gold); text-align: center; }
+  #admin p.sub { text-align: center; opacity: .75; margin: 0 0 24px; }
+  label { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; opacity: .8; margin: 18px 0 6px; }
+  textarea, input[type=text], select { width: 100%; background: #0d0a07; color: inherit; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font: inherit; }
+  textarea { min-height: 150px; resize: vertical; }
+  .row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+  #roster { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+  #roster .p { display: flex; align-items: center; gap: 6px; background: #0d0a07; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; padding: 5px 6px 5px 10px; }
+  #roster .p span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #roster .p button { border: 1px solid rgba(255,255,255,.15); background: none; border-radius: 6px; padding: 3px 7px; font-size: 12px; opacity: .6; }
+  #roster .p button[aria-pressed=true] { background: var(--gold); color: var(--ink); opacity: 1; border-color: var(--gold); }
+  .big { display: block; width: 100%; margin-top: 22px; padding: 14px; border-radius: 10px; border: 0; background: linear-gradient(#f0cf7c, #c99a3a); color: var(--ink); font-weight: 700; font-family: Cinzel, serif; font-size: 18px; letter-spacing: .06em; }
+  .big:disabled { filter: grayscale(1); opacity: .5; cursor: not-allowed; }
+  #linkbox { margin-top: 18px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #0d0a07; }
+  #linkbox .r { display: flex; gap: 8px; margin-top: 8px; }
+  #linkbox .r button, #linkbox .r a { white-space: nowrap; border: 1px solid var(--line); background: none; border-radius: 8px; padding: 9px 14px; color: var(--gold); text-decoration: none; }
+  small.hint { display: block; opacity: .6; margin-top: 6px; line-height: 1.5; }
+
+  /* overlays */
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; background: #0b0906; text-align: center; }
+  #loading .bar { width: min(320px, 70vw); height: 4px; background: #2a2118; border-radius: 2px; overflow: hidden; margin: 16px auto 0; }
+  #loading .bar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .2s; }
+  #hud { position: fixed; inset: 0; pointer-events: none; }
+  #hud > * { position: absolute; }
+  .chip { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; backdrop-filter: blur(6px); }
+  #top { top: max(12px, env(safe-area-inset-top)); left: 12px; }
+  #top .prize { color: var(--gold); font-family: Cinzel, serif; font-weight: 700; max-width: 46vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #top .alive { font-size: 13px; opacity: .85; margin-top: 2px; }
+  #sound { top: max(12px, env(safe-area-inset-top)); right: 12px; pointer-events: auto; width: 44px; height: 44px; padding: 0; font-size: 18px; }
+  #feed { top: 68px; right: 12px; width: min(300px, 60vw); display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  #feed div { background: var(--panel); border-radius: 6px; padding: 4px 9px; font-size: 13px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; animation: fade 7s forwards; }
+  #feed b { color: var(--gold); font-weight: 600; }
+  @keyframes fade { 0%, 80% { opacity: 1 } 100% { opacity: 0 } }
+  #spec { left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: stretch; gap: 8px; pointer-events: auto; max-width: calc(100vw - 16px); }
+  #spec button { width: 52px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); font-size: 20px; backdrop-filter: blur(6px); }
+  #spec button:active { background: var(--gold); color: var(--ink); }
+  #who { min-width: min(260px, 56vw); text-align: center; }
+  #who .n { font-family: Cinzel, serif; font-weight: 700; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #who .w { font-size: 12px; opacity: .8; margin-top: 2px; }
+  #who .hp { height: 6px; background: #2a2118; border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  #who .hp i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #c33, #e8c26a); transition: width .15s; }
+  #center { left: 50%; top: 22%; transform: translate(-50%, -50%); text-align: center; text-shadow: 0 2px 18px #000; width: 92vw; }
+  #center .t { font-family: Cinzel, serif; font-weight: 900; font-size: clamp(34px, 9vw, 96px); color: var(--gold); line-height: 1; }
+  #center .s { font-size: clamp(14px, 2.6vw, 22px); margin-top: 8px; }
+  #bars::before, #bars::after { content: ''; position: fixed; left: 0; right: 0; height: 0; background: #000; transition: height .8s; }
+  #bars::before { top: 0 } #bars::after { bottom: 0 }
+  #bars.on::before, #bars.on::after { height: 9vh; }
+  #credit { left: 12px; bottom: 10px; font-size: 11px; opacity: .55; }
+  @media (max-width: 900px) { #credit { display: none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+  "rapier": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/rapier.es.js"
+} }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="admin" hidden>
+  <div class="card">
+    <h1>Colosseum Giveaway Royale</h1>
+    <p class="sub">Enter the participants. They fight. The last one standing is handed the prize by the king.</p>
+    <label for="names">Participants — one per line (optionally <code>Name, m</code> or <code>Name, f</code>)</label>
+    <textarea id="names" placeholder="Maximus&#10;Livia, f&#10;xX_Brutus_Xx, m" spellcheck="false"></textarea>
+    <div id="roster"></div>
+    <div class="row2">
+      <div><label for="prize">Prize</label><input id="prize" type="text" maxlength="60" placeholder="Discord Nitro"></div>
+      <div><label for="delay">Starts in</label>
+        <select id="delay"><option value="20">20 seconds</option><option value="60" selected>1 minute</option><option value="120">2 minutes</option><option value="300">5 minutes</option><option value="600">10 minutes</option><option value="1800">30 minutes</option></select></div>
     </div>
-    <div id="raceContainer"></div>
+    <button class="big" id="create" disabled>Create giveaway link</button>
+    <div id="linkbox" hidden>
+      <strong class="cinzel">Share this link in your server</strong>
+      <div class="r"><input id="link" type="text" readonly><button id="copy">Copy</button><a id="open" href="#">Open</a></div>
+      <small class="hint">Everyone who opens it sees the same fight at the same time, each with their own camera. Viewers can add <code>&amp;me=TheirName</code> to the end to start on their own fighter. Each link is a fresh random fight.</small>
+    </div>
+  </div>
+</div>
 
-    <script>
-      // DOM selectors
-      const raceContainer = document.getElementById("raceContainer");
-      const startButton = document.getElementById("startButton");
-      const resetButton = document.getElementById("resetButton");
-      const drawsInput = document.getElementById("draws");
-      const speedInput = document.getElementById("speed");
-      const participantCountInput = document.getElementById("participantCount");
+<div id="loading" hidden><div><h2 class="cinzel" style="color:var(--gold)">Entering the arena…</h2><div id="loadmsg" style="opacity:.7;font-size:13px">Loading</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-      let participants = [];
-      let totalRounds;
-      let currentRound = 0;
-      const participantElements = {}; // keyed by unique id
-      let raceInterval;
-      let raceRunning = false;
+<div id="hud" hidden>
+  <div id="bars"></div>
+  <div id="top" class="chip"><div class="prize" id="hprize"></div><div class="alive" id="halive"></div></div>
+  <button id="sound" class="chip" aria-label="Toggle sound">🔇</button>
+  <div id="feed"></div>
+  <div id="center"><div class="t" id="ct"></div><div class="s" id="cs"></div></div>
+  <div id="spec">
+    <button id="prev" aria-label="Previous fighter">◀</button>
+    <div id="who" class="chip"><div class="n" id="wn"></div><div class="w" id="ww"></div><div class="hp"><i id="whp"></i></div></div>
+    <button id="next" aria-label="Next fighter">▶</button>
+  </div>
+  <div id="credit"></div>
+</div>
 
-      // Global unique id counter for participants
-      let nextParticipantId = 1;
-
-      // Predefined colors for up to 18 participants; extra ones use random colors.
-      const defaultColors = [
-        "#FF5733",
-        "#33C1FF",
-        "#8D33FF",
-        "#33FF57",
-        "#FFC300",
-        "#FF33A1",
-        "#338AFF",
-        "#B833FF",
-        "#33FFD1",
-        "#FF6F33",
-        "#85FF33",
-        "#FF3388",
-        "#33FF99",
-        "#FF3355",
-        "#3355FF",
-        "#FF9933",
-        "#33FFCC",
-        "#AA33FF",
-      ];
-      function getColor(index) {
-        if (index < defaultColors.length) return defaultColors[index];
-        return (
-          "#" +
-          Math.floor(Math.random() * 16777215)
-            .toString(16)
-            .padStart(6, "0")
-        );
-      }
-
-      // A very random index generator using crypto (if available) for added randomness.
-      function getRandomIndex(arr) {
-        if (window.crypto && window.crypto.getRandomValues) {
-          const randomBuffer = new Uint32Array(1);
-          window.crypto.getRandomValues(randomBuffer);
-          return randomBuffer[0] % arr.length;
-        } else {
-          return Math.floor(Math.random() * arr.length);
-        }
-      }
-
-      // Load participants and nextParticipantId from local storage or create new ones.
-      function loadParticipantsFromLocalStorage() {
-        const saved = localStorage.getItem("raceSimulationParticipants");
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) {
-              participants = parsed;
-            }
-          } catch (e) {
-            console.error("Error parsing participants from localStorage", e);
-          }
-        }
-        participants.forEach((p) => {
-          if (!p.id) {
-            p.id = nextParticipantId++;
-          } else {
-            nextParticipantId = Math.max(nextParticipantId, p.id + 1);
-          }
-        });
-        const savedId = localStorage.getItem("raceSimulationNextParticipantId");
-        if (savedId) {
-          nextParticipantId = Math.max(nextParticipantId, Number(savedId));
-        }
-        if (participants.length === 0) {
-          const count = Number(participantCountInput.value);
-          for (let i = 1; i <= count; i++) {
-            participants.push({
-              id: nextParticipantId++,
-              name: `player_${i}`,
-              wins: 0,
-              color: getColor(i - 1),
-            });
-          }
-        }
-        participantCountInput.value = participants.length;
-        saveNextParticipantId();
-      }
-
-      function saveNextParticipantId() {
-        localStorage.setItem(
-          "raceSimulationNextParticipantId",
-          nextParticipantId
-        );
-      }
-
-      // Save participants to local storage
-      function saveParticipantsToLocalStorage() {
-        localStorage.setItem(
-          "raceSimulationParticipants",
-          JSON.stringify(participants)
-        );
-      }
-
-      // Update participants array based on the participantCount input ensuring uniqueness
-      function updateParticipantsFromCount(newCount) {
-        const currentCount = participants.length;
-        if (newCount > currentCount) {
-          for (let i = currentCount + 1; i <= newCount; i++) {
-            participants.push({
-              id: nextParticipantId++,
-              name: `player_${i}`,
-              wins: 0,
-              color: getColor(i - 1),
-            });
-          }
-          saveNextParticipantId();
-        } else if (newCount < currentCount) {
-          participants.splice(newCount, currentCount - newCount);
-        }
-        saveParticipantsToLocalStorage();
-        initialRender();
-      }
-
-      // Render participants based on the participants array.
-      function initialRender() {
-        raceContainer.innerHTML = "";
-        for (const key in participantElements) delete participantElements[key];
-
-        participants.forEach((participant, index) => {
-          const participantDiv = document.createElement("div");
-          participantDiv.className = "participant";
-          participantDiv.dataset.id = participant.id;
-
-          const label = document.createElement("input");
-          label.className = "label";
-          label.value = participant.name;
-          label.style.border = `2px solid ${participant.color}`;
-          label.style.background = "white";
-          label.addEventListener("input", (e) => {
-            const p = participants.find((item) => item.id === participant.id);
-            if (p) {
-              p.name = e.target.value;
-              saveParticipantsToLocalStorage();
-            }
-          });
-
-          drawsInput.value = participants.length * 100;
-          speedInput.value = localStorage.getItem("raceSimulationSpeed") || 1;
-          const bar = document.createElement("div");
-          bar.className = "bar";
-          // Dynamically set transition based on the current speed value.
-          bar.style.transition = `width ${
-            1000 / Number(speedInput.value) - 60
-          }ms ease-in-out`;
-          bar.style.backgroundColor = participant.color;
-          participantDiv.style.height = "100%";
-
-          const count = document.createElement("span");
-          count.className = "count";
-          count.style.border = `2px solid ${participant.color}`;
-          count.textContent = `${participant.wins}`;
-
-          bar.appendChild(count);
-          participantDiv.appendChild(label);
-          participantDiv.appendChild(bar);
-          raceContainer.appendChild(participantDiv);
-
-          participantElements[participant.id] = participantDiv;
-        });
-      }
-
-      // Update race state and animate reordering using FLIP.
-      function updateRace() {
-        const firstPositions = {};
-        Object.keys(participantElements).forEach((id) => {
-          firstPositions[id] =
-            participantElements[id].getBoundingClientRect().top;
-        });
-        const maxWins = Math.max(...participants.map((p) => p.wins));
-        participants.forEach((participant) => {
-          const participantDiv = participantElements[participant.id];
-          if (participantDiv) {
-            const ow = participantDiv.querySelector(".label").offsetWidth;
-            const bar = participantDiv.querySelector(".bar");
-            const widthPercentage =
-              maxWins > 0 ? (participant.wins / maxWins) * 100 : 0;
-            // Use requestAnimationFrame to allow the browser to register the previous width
-            requestAnimationFrame(() => {
-              bar.style.width = `calc(${widthPercentage}% - ${ow}px)`;
-            });
-            const count = participantDiv.querySelector(".count");
-            count.textContent = `${participant.wins}`;
-          }
-        });
-
-        // Sort participants by wins (highest first).
-        participants.sort((a, b) => b.wins - a.wins);
-        const currentOrder = Array.from(raceContainer.children).map(
-          (el) => el.dataset.id
-        );
-        const newOrder = participants.map((participant) =>
-          participant.id.toString()
-        );
-        if (JSON.stringify(currentOrder) !== JSON.stringify(newOrder)) {
-          participants.forEach((participant) => {
-            raceContainer.appendChild(participantElements[participant.id]);
-          });
-        }
-
-        // Apply FLIP animation for reordering.
-        Object.keys(participantElements).forEach((id) => {
-          const el = participantElements[id];
-          const first = firstPositions[id];
-          const last = el.getBoundingClientRect().top;
-          const delta = first - last;
-          if (delta) {
-            el.style.transform = `translateY(${delta}px)`;
-            el.style.transition = "transform 0s";
-            el.offsetHeight; // Force reflow.
-            el.style.transition = `transform ${
-              (1000 / Number(speedInput.value)) * 1.1
-            }ms ease-in-out`;
-            el.style.transform = "";
-          }
-        });
-      }
-
-      let previousIndex = null;
-      let isMotivated = false;
-      function getRandomBoolean() {
-        const array = new Uint8Array(1);
-        crypto.getRandomValues(array);
-        return array[0] < 128; // 128 is half of 256
-      }
-      function runRound() {
-        // Using a uniform random selection for 100% unbiased randomness.
-        const randomIndex = Math.floor(Math.random() * participants.length);
-        isMotivated = getRandomBoolean();
-        if (isMotivated) {
-          participants[previousIndex].wins++;
-        } else {
-          participants[randomIndex].wins++;
-          previousIndex = randomIndex;
-        }
-        currentRound++;
-        drawsInput.value = Number(drawsInput.value) - 1;
-        updateRace();
-        saveParticipantsToLocalStorage();
-        if (currentRound >= totalRounds) {
-          clearInterval(raceInterval);
-          drawsInput.style.border = "2px solid #ff0000";
-          startButton.style.display = "none";
-          resetButton.style.display = "block";
-        }
-      }
-
-      // Event listeners.
-      participantCountInput.addEventListener("change", (e) => {
-        const newCount = Number(e.target.value);
-        updateParticipantsFromCount(newCount);
-      });
-      drawsInput.addEventListener("input", (event) => {
-        totalRounds = event.target.value;
-      });
-      startButton.addEventListener("click", () => {
-        if (raceRunning) {
-          clearInterval(raceInterval);
-          startButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
-          <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
-        </svg>`;
-          resetButton.style.display = "block";
-          drawsInput.style.cursor = "auto";
-          drawsInput.removeAttribute("disabled");
-          participantCountInput.style.cursor = "auto";
-          participantCountInput.removeAttribute("disabled");
-        } else {
-          totalRounds = drawsInput.value;
-          raceInterval = setInterval(
-            runRound,
-            1000 / Number(speedInput.value) + 10
-          );
-          startButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pause-fill" viewBox="0 0 16 16">
-          <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5m5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5"/>
-        </svg>`;
-          drawsInput.style.cursor = "not-allowed";
-          participantCountInput.style.cursor = "not-allowed";
-          resetButton.style.display = "none";
-        }
-        raceRunning = !raceRunning;
-      });
-      resetButton.addEventListener("click", () => {
-        clearInterval(raceInterval);
-        raceRunning = false;
-        currentRound = 0;
-        drawsInput.value = 1000;
-        drawsInput.style.border = "2px solid #000";
-        drawsInput.style.cursor = "auto";
-        drawsInput.removeAttribute("disabled");
-        participantCountInput.style.cursor = "auto";
-        participantCountInput.removeAttribute("disabled");
-        participants.forEach((p) => (p.wins = 0));
-        saveParticipantsToLocalStorage();
-        initialRender();
-        startButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-play-fill" viewBox="0 0 16 16">
-          <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393"/>
-        </svg>`;
-        startButton.style.display = "block";
-        resetButton.style.display = "none";
-      });
-      speedInput.addEventListener("input", (e) => {
-        localStorage.setItem("raceSimulationSpeed", e.target.value);
-        initialRender();
-      });
-      // Initial setup.
-      loadParticipantsFromLocalStorage();
-      initialRender();
-      totalRounds = drawsInput.value;
-    </script>
-  </body>
+<script type="module" src="src/main.js"></script>
+</body>
 </html>
