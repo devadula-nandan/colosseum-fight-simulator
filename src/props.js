@@ -123,6 +123,17 @@ export const WEAPON_LEN = { dagger: 0.33, longsword: 1.0, mace: 0.6, spear: 1.66
 // where the second hand goes on a two-handed weapon, in the weapon's own frame (grip at the origin)
 export const WEAPON_OFFHAND = { axe: [0, 0.26, 0], hammer: [0, 0.28, 0], trident: [0, 0.4, 0], crossbow: [0.24, 0.02, 0], bow: [-0.259, 0, 0] };
 
+// How a two-handed weapon is carried when it is not being swung, in the fighter's own frame (facing +Z, their right
+// is -X, measured from the spine_02 bone, about 1.18 m up; the hips are 0.2 below it): where the rear hand sits, which way the weapon's long axis points, and which way
+// its second axis (the striking edge, or "up" for a crossbow) is turned. long: 1 = the model's +Y, 0 = its +X.
+export const WEAPON_CARRY = {
+  axe:      { hand: [-0.2, -0.22, 0.08], long: 1, dir: [0.55, 0.25, 0.8], edge: [0, 1, 0] },      // low ready: head forward and across the body at chest height
+  hammer:   { hand: [-0.2, -0.22, 0.08], long: 1, dir: [0.55, 0.25, 0.8], edge: [0, 1, 0] },
+  trident:  { hand: [-0.24, -0.2, -0.05], long: 1, dir: [0.2, 0.18, 0.96],  edge: [1, 0, 0] },      // levelled, tines forward
+  bow:      { hand: [-0.06, -0.08, 0.4],   long: 1, dir: [0.12, 0.97, 0.2],  edge: [0, 0, 1] },      // upright in front, string hand behind it
+  crossbow: { hand: [-0.16, -0.18, 0.22],  long: 0, dir: [0.12, -0.3, 0.95], edge: [0, 1, 0] },      // low ready, pointing at the ground ahead
+};
+
 export const WEAPON_BOX = {
   dagger: [0.04, 0.17, 0.02], sword: [0.07, 0.34, 0.02], longsword: [0.1, 0.52, 0.02], mace: [0.07, 0.3, 0.07], axe: [0.14, 0.38, 0.03],
   hammer: [0.13, 0.4, 0.07], spear: [0.03, 0.85, 0.03], trident: [0.12, 0.62, 0.02], javelin: [0.02, 0.6, 0.02], bow: [0.12, 0.5, 0.02], crossbow: [0.26, 0.06, 0.28],

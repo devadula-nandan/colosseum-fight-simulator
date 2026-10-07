@@ -12,7 +12,7 @@ import { createSim, DT, RX, RZ } from './sim.js';
 import { WEAPON_BY_ID } from './weapons.js';
 import { createWorld, THRONE, GATE, BOX_Y } from './world.js';
 import { loadCharacters } from './fighters.js';
-import { makeWeapon, makeChest, makeArrow, WEAPON_BOX, WEAPON_LEN, WEAPON_OFFHAND } from './props.js';
+import { makeWeapon, makeChest, makeArrow, WEAPON_BOX, WEAPON_LEN, WEAPON_OFFHAND, WEAPON_CARRY } from './props.js';
 import { createAudio } from './audio.js';
 
 const $ = id => document.getElementById(id);
@@ -322,6 +322,12 @@ async function show(cfg) {
   // seconds by which each swing's clip is made to land early [low, mid, high]: measured as the gap between the frame
   // the sim registers a hit and the frame the blade is nearest the body, so the two coincide
   const OFFHAND = Object.fromEntries(Object.entries(WEAPON_OFFHAND).map(([k, v]) => [k, new THREE.Vector3(...v)]));
+  const CARRY = Object.fromEntries(Object.entries(WEAPON_CARRY).map(([k, c]) => {
+    const a = new THREE.Vector3(...c.dir).normalize(), b = new THREE.Vector3(...c.edge);
+    b.addScaledVector(a, -b.dot(a)).normalize();
+    const x = c.long ? b : a, y = c.long ? a : b, z = new THREE.Vector3().crossVectors(x, y);
+    return [k, { pos: new THREE.Vector3(...c.hand), quat: new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, y, z)) }];
+  }));
   const LEAD = { blade: [-0.02, 0, 0.02], light: [0, 0, 0.045], heavy: [0, 0.02, 0.015], thrust: [0, 0, 0.035] };
   function handle(e) {
     const F = S.fighters;
@@ -613,7 +619,8 @@ async function show(cfg) {
           c.look = o && far < 12 && far > 0.3 && f.act !== 'dodge' && f.act !== 'stun' && f.act !== 'slip' && phase !== 'ceremony' ? lerpAngle(0, Math.atan2(o.x - f.x, o.z - f.z) - c.yaw, 1) : 0;
           c.look = Math.abs(c.look) > 2.1 ? 0 : Math.max(-1.1, Math.min(1.1, c.look));      // no owl necks: someone straight behind is not looked at
         }
-        { const oh = f.item && f.act !== 'dodge' && f.act !== 'slip' && !c.rag && phase !== 'ceremony' && OFFHAND[f.item.wid]; c.offhand = oh || null; if (oh) { c.offMesh = items[f.item.id].mesh; c.offAxis = f.item.wid === 'crossbow' ? 0 : 1; } }      // both hands on a two-handed weapon
+        { const oh = f.item && f.act !== 'dodge' && f.act !== 'slip' && !c.rag && phase !== 'ceremony' && OFFHAND[f.item.wid]; c.offhand = oh || null; if (oh) { c.offMesh = items[f.item.id].mesh; c.offAxis = f.item.wid === 'crossbow' ? 0 : 1; }
+          c.carry = oh && !f.swing && f.guard <= 0 && f.act !== 'pickup' && f.act !== 'taunt' ? CARRY[f.item.wid] : null; }      // both hands on a two-handed weapon
         if (c.col) c.col.setNextKinematicTranslation({ x: f.x, y: c.rag ? -50 : 0, z: f.z });      // out of the way of its own limp body
         if (c.rag) { c.rag.follow = f; if (f.act !== 'slip') c.recover(); }
         { // turn like a body with weight: eased, and never faster than about a full turn a second
@@ -772,7 +779,7 @@ async function show(cfg) {
       items.forEach(v => { v.mesh.visible = false; });
       camPos.set(cam[0], cam[1], cam[2]); camLook.set(cam[3], cam[4], cam[5]);
       frame(last, true);
-    }, chars, world, camera, king, get phase() { return phase; }, set t0(v) { t0 = v; }, get quality() { return quality; } };
+    }, chars, world, camera, king, CARRY, OFFHAND, get phase() { return phase; }, set t0(v) { t0 = v; }, get quality() { return quality; } };
   // #look: a turntable for checking every hairstyle on its own. ◀ ▶ steps through them; each has a number to refer to.
   if (cfg.look) {
     labOn = true;

@@ -529,6 +529,7 @@ export async function loadCharacters(manager, RAPIER, physics) {
     if (!fitCache.has(k)) { const c = m.clone(); c.color.setHex(metal).multiplyScalar(m.userData.tint); fitCache.set(k, c); }
     return fitCache.get(k);
   };
+  const ikSave2 = [Q(), Q(), Q()], ikGq = Q(), ikQ2 = Q();
   const ikSave = [Q(), Q(), Q(), Q(), Q(), Q()], ikHold = Q(), ikG = V();
   // two-bone reach: bend the elbow until the hand is the right distance from the shoulder, then swing the whole arm
   // so the hand lands on the target
@@ -741,6 +742,19 @@ export async function loadCharacters(manager, RAPIER, physics) {
         const B = this.bones, w = this.offW, arms = this.ikArms ??= [B.upperarm_r, B.lowerarm_r, B.hand_r, B.upperarm_l, B.lowerarm_l, B.hand_l];
         for (let i = 0; i < 6; i++) ikSave[i].copy(arms[i].quaternion);
         const mesh = this.offOn;
+        // 0. not swinging: the weapon is carried in a proper two-handed stance instead of wherever the one-handed
+        //    clip happens to leave the sword hand
+        this.carryW = (this.carryW || 0) + ((this.carry ? 1 : 0) - (this.carryW || 0)) * Math.min(1, real * 9);
+        if (this.carry) this.carryAt = this.carry;
+        if (this.carryW > 0.02 && this.carryAt) {
+          const rq = this.root.quaternion, sc = this.root.scale.x;
+          ikGq.copy(rq).multiply(this.carryAt.quat).multiply(ikQ2.copy(this.grip.quaternion).invert());        // the hand's rotation that puts the weapon that way
+          B.spine_02.getWorldPosition(ikG).add(ikA.copy(this.carryAt.pos).multiplyScalar(sc).applyQuaternion(rq));
+          ikG.sub(ikA.copy(this.grip.position).multiplyScalar(sc).applyQuaternion(ikGq));                      // wrist, given where the grip must be
+          reachTo(B.upperarm_r, B.lowerarm_r, B.hand_r, ikG);
+          B.hand_r.parent.getWorldQuaternion(ikP); B.hand_r.quaternion.copy(ikP.invert().multiply(ikGq));
+          if (this.carryW < 0.98) for (let i = 0; i < 3; i++) arms[i].quaternion.copy(ikSave2[i].copy(ikSave[i]).slerp(arms[i].quaternion, this.carryW));
+        }
         const haftPoint = () => { mesh.updateWorldMatrix(true, false); return ikT.copy(this.offAt).applyMatrix4(mesh.matrixWorld); };
         // 1. draw the right hand in until the spot for the left hand is within the left arm's reach
         haftPoint();
