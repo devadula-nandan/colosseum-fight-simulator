@@ -2,7 +2,7 @@
 
 A browser 3D battle royale for picking a giveaway winner. Static files only, no server.
 
-**Live:** https://devadula-nandan.github.io/race-simulator-bar-graph/
+**Live:** https://devadula-nandan.github.io/colosseum-fight-simulator/
 
 ## What happens
 
